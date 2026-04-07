@@ -1,52 +1,47 @@
-# 1. Import the FastAPI class from the fastapi package. 
-# This class provides all the core functionality for routing and data validation.
 from fastapi import FastAPI
-
-# import CORS middleware
 from fastapi.middleware.cors import CORSMiddleware
 
-# Import controller logic
-from controller.dashboard_controller import fetch_dashboard_data
+from routes.dashboard_routes import dashboard_router
+from routes.users_routes import user_router
+from routes.shops_routes import shop_router
+from database import engine, Base
 
-# 2. Create an instance of the FastAPI application.
-# The 'app' variable is the actual application object that handles incoming web requests.
-app = FastAPI()
+# Create the FastAPI application
+app = FastAPI(
+    title="Inventory Management API",
+    description="API for managing inventory, users, and shops",
+    version="1.0.0",
+)
 
-# Add CORS middleware to allow requests from the frontend
+# Create all database tables
+Base.metadata.create_all(bind=engine)
+
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173", 
-        "http://localhost:5174", 
-        "http://127.0.0.1:5173", 
-        "http://127.0.0.1:5174"
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 3. Define a "Route" or "Endpoint". 
-# The @app.get("/") decorator tells FastAPI that any HTTP GET requests sent to the 
-# root URL (like http://localhost:8000/) should be handled by the function below it.
+
 @app.get("/")
 def read_root():
-    # FastAPI automatically converts Python dictionaries into JSON format 
-    # when returning this response back to the client's browser or app.
-    return "welcome to the inventory management app!"
+    return {"message": "Welcome to the Inventory Management API"}
 
 
-# Dashboard API Route
-@app.get("/dashboard")
-def get_dashboard_data():
-    """Route purely responsible for handling the dashboard request and delegating work."""
-    return fetch_dashboard_data()
+# Register routers
+app.include_router(dashboard_router)
+app.include_router(user_router)
+app.include_router(shop_router)
 
-# 4. Start the development server.
-# This block ensures the server only starts if you run this script directly 
-# (e.g., by typing 'python main.py' in the terminal).
+
 if __name__ == "__main__":
     import uvicorn
-    # uvicorn.run starts the web server which listens for traffic. 
-    # We use "127.0.0.1" (localhost) so it runs safely on your local machine, on port 8000.
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
