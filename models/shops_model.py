@@ -41,11 +41,29 @@ class ShopBase(BaseModel):
     address_id: Optional[str] = None
 
 
+class ShopCreate(BaseModel):
+    """Model for creating a new shop with address."""
+    name: str
+    owner_id: str
+    type: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    district: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
+
+
 class ShopUpdate(BaseModel):
     """All fields optional for partial updates."""
     name: Optional[str] = None
     owner_id: Optional[str] = None
     address_id: Optional[str] = None
+    type: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    district: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
 
 
 class ShopResponse(ShopBase):

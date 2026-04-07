@@ -1,8 +1,26 @@
 # services/shops_service.py - Business logic layer for shop operations
 
 from sqlalchemy.orm import Session
-from queries.shops_query import get_shops_by_user_query, get_shop_by_id, update_shop_query, update_address_query
-from models.shops_model import ShopUpdate, AddressUpdate, ShopResponse, ShopWithAddressResponse, AddressResponse
+from queries.shops_query import (
+    get_shops_by_user_query,
+    get_shop_by_id,
+    get_shop_by_name_and_owner,
+    create_shop_query,
+    update_shop_query,
+    update_address_query,
+)
+from models.shops_model import ShopCreate, ShopUpdate, AddressUpdate, ShopResponse, ShopWithAddressResponse, AddressResponse
+
+
+def create_shop_service(db: Session, shop_data: ShopCreate) -> ShopResponse | dict:
+    """Creates a new shop. Returns error if shop with same name already exists for this owner."""
+    existing = get_shop_by_name_and_owner(db, shop_data.name, shop_data.owner_id)
+    if existing:
+        return {"error": "Shop with this name already exists"}
+    result = create_shop_query(db, shop_data)
+    if not result:
+        return {"error": "Invalid owner_id - user does not exist"}
+    return result
 
 
 def get_shops_by_user_service(db: Session, user_id: str) -> list[ShopWithAddressResponse]:
